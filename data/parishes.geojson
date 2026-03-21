@@ -10,21 +10,24 @@
         "records": [
           {
             "type": "Births",
-            "from": 1820,
-            "to": 1875,
-            "url": "https://example.com/births"
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
           },
           {
             "type": "Marriages",
-            "from": 1830,
-            "to": 1890,
-            "url": "https://example.com/marriages"
+            "periods": [
+              { "from": 1760, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1840, "url": "https://example.com/b" }
+            ]
           },
           {
             "type": "Deaths",
-            "from": 1815,
-            "to": 1880,
-            "url": "https://example.com/deaths"
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
           }
         ]
       },
@@ -42,15 +45,17 @@
         "records": [
           {
             "type": "Births",
-            "from": 1780,
-            "to": 1850,
-            "url": "https://example.com/trzebnica-births"
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
           },
           {
             "type": "Marriages",
-            "from": 1790,
-            "to": 1860,
-            "url": "https://example.com/trzebnica-marriages"
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
           }
         ]
       },
