@@ -127,6 +127,16 @@ recordType.addEventListener("change", () => {
   updateMap(parseInt(slider.value), recordType.value);
 });
 
+// --- select Region ---
+
+const regionSelect = document.getElementById("regionSelect");
+
+regionSelect.addEventListener("change", () => {
+  loadRegion(regionSelect.value);
+});
+
+loadRegion(regionSelect.value);
+
 // --- COLLAPSIBLE PANEL ---
 
 const controls = document.getElementById("controls");
