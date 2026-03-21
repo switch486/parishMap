@@ -78,24 +78,38 @@ function updateMap(year, type) {
 
 // --- LOAD DATA ---
 
-fetch('./data/parishes.geojson')
-  .then(res => res.json())
-  .then(data => {
+let currentLayer;
 
-    geoLayer = L.geoJSON(data, {
-      pointToLayer: function (feature, latlng) {
-        return L.marker(latlng, {
-          icon: createIcon("gray")
-        });
-      },
-      onEachFeature: function (feature, layer) {
-        layer.bindPopup(formatPopup(feature.properties));
-      }
-    }).addTo(map);
+function loadRegion(regionPath) {
+  // Remove old layer
+  if (currentLayer) {
+    map.removeLayer(currentLayer);
+  }
 
-    const year = parseInt(slider.value);
-    updateMap(year, recordType.value);
-  });
+  fetch(`./data/${regionPath}/data.geojson`)
+    .then(res => res.json())
+    .then(data => {
+
+      currentLayer = L.geoJSON(data, {
+        pointToLayer: function (feature, latlng) {
+          return L.marker(latlng, {
+            icon: createIcon("gray")
+          });
+        },
+        onEachFeature: function (feature, layer) {
+          layer.bindPopup(formatPopup(feature.properties));
+        }
+      }).addTo(map);
+
+      geoLayer = currentLayer;
+
+      updateMap(
+        parseInt(slider.value),
+        recordType.value
+      );
+    })
+    .catch(err => console.error("Error loading region:", err));
+}
 
 // --- CONTROLS ---
 
