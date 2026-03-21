@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Parish Records Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    .popup-content {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .record {
+      margin-bottom: 6px;
+    }
+
+    .record a {
+      text-decoration: none;
+      color: #0066cc;
+    }
+
+    .record a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  // Initialize map centered on Wrocław region
+  const map = L.map('map').setView([51.1079, 17.0385], 8);
+
+  // Base layer (OpenStreetMap)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Function to format popup content
+  function formatPopup(properties) {
+    let html = `<div class="popup-content">`;
+    html += `<b>${properties.name}</b><br>`;
+    
+    if (properties.deanery) {
+      html += `Deanery: ${properties.deanery}<br>`;
+    }
+    if (properties.diocese) {
+      html += `Diocese: ${properties.diocese}<br>`;
+    }
+
+    html += `<hr>`;
+
+    properties.records.forEach(r => {
+      html += `<div class="record">`;
+      html += `<b>${r.type}</b>: ${r.from}–${r.to}<br>`;
+      html += `<a href="${r.url}" target="_blank">View records</a>`;
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+    return html;
+  }
+
+  // Load GeoJSON data
+  fetch('./data/parishes.geojson')
+    .then(response => response.json())
+    .then(data => {
+      const geoLayer = L.geoJSON(data, {
+        onEachFeature: function (feature, layer) {
+          layer.bindPopup(formatPopup(feature.properties));
+        }
+      });
+
+      geoLayer.addTo(map);
+    })
+    .catch(err => {
+      console.error("Error loading GeoJSON:", err);
+    });
+
+</script>
+
+</body>
+</html>
