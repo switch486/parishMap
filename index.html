@@ -5,212 +5,49 @@
   <title>Parish Records Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet CSS -->
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    #map {
-      height: 100vh;
-      width: 100%;
-    }
-
-    #controls {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 12px 16px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      z-index: 1000;
-      font-size: 14px;
-      min-width: 320px;
-    }
-
-    #controls label {
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    #yearSlider {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-
-    #recordType {
-      width: 100%;
-      padding: 4px;
-    }
-
-    #legend {
-      margin-top: 10px;
-      font-size: 13px;
-    }
-
-    .dot {
-      font-size: 18px;
-      vertical-align: middle;
-    }
-
-    .popup-content {
-      font-size: 14px;
-      line-height: 1.4;
-    }
-
-    .record {
-      margin-bottom: 6px;
-    }
-  </style>
+  <!-- Your styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div id="controls">
-  <label>
-    Year: <strong><span id="yearValue">1850</span></strong>
-  </label>
-  <input type="range" id="yearSlider" min="1700" max="1950" value="1850" />
+<div id="controls" class="collapsed">
+  <div id="controls-header">
+    📊 Filters
+    <button id="toggleControls">▼</button>
+  </div>
 
-  <label for="recordType">Record type:</label>
-  <select id="recordType">
-    <option value="Births">Births</option>
-    <option value="Marriages">Marriages</option>
-    <option value="Deaths">Deaths</option>
-  </select>
+  <div id="controls-body">
+    <div class="control-row">
+      <label>
+        Year: <strong><span id="yearValue">1850</span></strong>
+      </label>
+      <input type="range" id="yearSlider" min="1700" max="1950" value="1850" />
+    </div>
 
-  <div id="legend">
-    <span class="dot" style="color:green;">●</span> Available<br>
-    <span class="dot" style="color:red;">●</span> Not in selected year<br>
-    <span class="dot" style="color:gray;">●</span> No records of this type
+    <div class="control-row">
+      <label for="recordType">Record type:</label>
+      <select id="recordType">
+        <option value="Births">Births</option>
+        <option value="Marriages">Marriages</option>
+        <option value="Deaths">Deaths</option>
+      </select>
+    </div>
+
+    <div id="legend">
+      <span><span class="dot green"></span> available</span>
+      <span><span class="dot red"></span> missing year</span>
+      <span><span class="dot gray"></span> no records</span>
+    </div>
   </div>
 </div>
 
 <div id="map"></div>
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-  // Initialize map (Wrocław region)
-  const map = L.map('map').setView([51.1079, 17.0385], 8);
-
-  // Base layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
-  let geoLayer;
-
-  function formatPopup(properties) {
-    let html = `<div class="popup-content">`;
-    html += `<b>${properties.name}</b><br>`;
-    
-    if (properties.deanery) {
-      html += `Deanery: ${properties.deanery}<br>`;
-    }
-    if (properties.diocese) {
-      html += `Diocese: ${properties.diocese}<br>`;
-    }
-
-    html += `<hr>`;
-
-    properties.records.forEach(r => {
-      html += `<div class="record">`;
-      html += `<b>${r.type}</b>: ${r.from}–${r.to}<br>`;
-      html += `<a href="${r.url}" target="_blank">View records</a>`;
-      html += `</div>`;
-    });
-
-    html += `</div>`;
-    return html;
-  }
-
-  // Check if parish has ANY records of selected type
-  function hasType(records, type) {
-    return records.some(r => r.type === type);
-  }
-
-  // Check if parish has records of selected type IN YEAR
-  function hasTypeInYear(records, type, year) {
-    return records.some(r =>
-      r.type === type &&
-      year >= r.from &&
-      year <= r.to
-    );
-  }
-
-  function updateMap(year, type) {
-    geoLayer.eachLayer(layer => {
-      const props = layer.feature.properties;
-      const records = props.records;
-
-      let color;
-
-      if (!hasType(records, type)) {
-        color = "gray";
-      } else if (hasTypeInYear(records, type, year)) {
-        color = "green";
-      } else {
-        color = "red";
-      }
-
-      layer.setStyle({
-        fillColor: color,
-        color: "#333",
-        weight: 1,
-        fillOpacity: 0.85
-      });
-    });
-  }
-
-  // Load data
-  fetch('./data/parishes.geojson')
-    .then(response => response.json())
-    .then(data => {
-
-      geoLayer = L.geoJSON(data, {
-        pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, {
-            radius: 8,
-            fillColor: "gray",
-            color: "#333",
-            weight: 1,
-            fillOpacity: 0.85
-          });
-        },
-        onEachFeature: function (feature, layer) {
-          layer.bindPopup(formatPopup(feature.properties));
-        }
-      }).addTo(map);
-
-      // Initial render
-      const year = parseInt(document.getElementById("yearSlider").value);
-      const type = document.getElementById("recordType").value;
-      updateMap(year, type);
-    });
-
-  // Controls
-  const slider = document.getElementById("yearSlider");
-  const yearValue = document.getElementById("yearValue");
-  const recordType = document.getElementById("recordType");
-
-  slider.addEventListener("input", function () {
-    const year = parseInt(this.value);
-    yearValue.textContent = year;
-    updateMap(year, recordType.value);
-  });
-
-  recordType.addEventListener("change", function () {
-    const year = parseInt(slider.value);
-    updateMap(year, this.value);
-  });
-
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>
