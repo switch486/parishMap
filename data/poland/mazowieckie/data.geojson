@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Parish of Holy Trinity (Błonie)",
+        "deanery": "Błonie",
+        "diocese": "Archdiocese of Warsaw",
+        "records": [
+          {
+            "type": "Births",
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
+          },
+          {
+            "type": "Marriages",
+            "periods": [
+              { "from": 1760, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1840, "url": "https://example.com/b" }
+            ]
+          },
+          {
+            "type": "Deaths",
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [52.19354166515545, 20.61392332883553]
+      }
+    }
+  ]
+}
