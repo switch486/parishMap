@@ -1,0 +1,63 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Parish of St. John the Baptist (Wrocław)",
+        "deanery": "Wrocław Central",
+        "diocese": "Archdiocese of Wrocław",
+        "records": [
+          {
+            "type": "Births",
+            "from": 1820,
+            "to": 1875,
+            "url": "https://example.com/births"
+          },
+          {
+            "type": "Marriages",
+            "from": 1830,
+            "to": 1890,
+            "url": "https://example.com/marriages"
+          },
+          {
+            "type": "Deaths",
+            "from": 1815,
+            "to": 1880,
+            "url": "https://example.com/deaths"
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [17.0385, 51.1079]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Parish of St. Hedwig (Trzebnica)",
+        "deanery": "Trzebnica",
+        "diocese": "Archdiocese of Wrocław",
+        "records": [
+          {
+            "type": "Births",
+            "from": 1780,
+            "to": 1850,
+            "url": "https://example.com/trzebnica-births"
+          },
+          {
+            "type": "Marriages",
+            "from": 1790,
+            "to": 1860,
+            "url": "https://example.com/trzebnica-marriages"
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [17.0631, 51.3104]
+      }
+    }
+  ]
+}
