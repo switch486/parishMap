@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Polish Parish Records Map</title>
+  <title>Parish Records Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <!-- Your styles -->
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
@@ -22,21 +23,13 @@
   </div>
 
   <div id="controls-body">
+
     <div class="control-row">
       <label>
         Year: <strong><span id="yearValue">1850</span></strong>
       </label>
       <input type="range" id="yearSlider" min="1700" max="1950" value="1850" />
     </div>
-
-<div class="control-row">
-  <label>Regions:</label>
-  <div id="regionList">
-    <label><input type="checkbox" value="poland/dolnoslaskie" checked> Dolnośląskie</label>
-    <label><input type="checkbox" value="poland/mazowieckie"> Mazowieckie</label>
-    <label><input type="checkbox" value="belarus"> Belarus</label>
-  </div>
-</div>
 
     <div class="control-row">
       <label for="recordType">Record type:</label>
@@ -47,13 +40,21 @@
       </select>
     </div>
 
-    
+    <div class="control-row">
+      <label>Regions:</label>
+      <div id="regionList">
+        <label><input type="checkbox" value="poland/dolnoslaskie"> Dolnośląskie</label>
+        <label><input type="checkbox" value="poland/mazowieckie"> Mazowieckie</label>
+        <label><input type="checkbox" value="belarus"> Belarus</label>
+      </div>
+    </div>
 
     <div id="legend">
       <span><span class="dot green"></span> available</span>
       <span><span class="dot red"></span> missing year</span>
       <span><span class="dot gray"></span> no records</span>
     </div>
+
   </div>
 </div>
 
