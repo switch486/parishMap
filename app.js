@@ -1,40 +1,122 @@
-// --- MAP INIT ---
-const map = L.map('map').setView([51.1079, 17.0385], 8);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-// --- STATE ---
-let layers = {};
+// --- DEFAULTS ---
+const DEFAULT_VIEW = { lat: 51.1079, lng: 17.0385, zoom: 8 };
+const DEFAULT_LANG = "en";
 
 // --- URL PARAMS ---
-
 function getParams() {
-  const params = new URLSearchParams(window.location.search);
-
+  const p = new URLSearchParams(location.search);
   return {
-    year: parseInt(params.get("year")) || 1850,
-    type: params.get("type") || "Births",
-    regions: params.get("regions") ? params.get("regions").split(",") : []
+    year: parseInt(p.get("year")) || 1850,
+    type: p.get("type") || "Births",
+    regions: p.get("regions") ? p.get("regions").split(",") : [],
+    lat: parseFloat(p.get("lat")) || DEFAULT_VIEW.lat,
+    lng: parseFloat(p.get("lng")) || DEFAULT_VIEW.lng,
+    zoom: parseInt(p.get("zoom")) || DEFAULT_VIEW.zoom,
+    lang: p.get("lang") || DEFAULT_LANG
   };
 }
 
-function updateURL(year, type, regions) {
+function updateURL() {
   const params = new URLSearchParams();
-
-  params.set("year", year);
-  params.set("type", type);
-
-  if (regions.length > 0) {
-    params.set("regions", regions.join(","));
-  }
-
+  params.set("year", state.year);
+  params.set("type", state.type);
+  params.set("regions", state.regions.join(","));
+  params.set("lat", map.getCenter().lat.toFixed(4));
+  params.set("lng", map.getCenter().lng.toFixed(4));
+  params.set("zoom", map.getZoom());
+  params.set("lang", state.lang);
   history.replaceState(null, "", "?" + params.toString());
 }
 
-// --- DATA LOGIC ---
+// --- STATE ---
+const params = getParams();
 
+let state = {
+  year: params.year,
+  type: params.type,
+  regions: params.regions,
+  lang: params.lang
+};
+
+let translations = {};
+let layers = {};
+
+// --- MAP ---
+const map = L.map('map').setView([params.lat, params.lng], params.zoom);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+// --- I18N ---
+async function loadTranslations(lang) {
+  const res = await fetch(`./i18n/${lang}.json`);
+  translations = await res.json();
+}
+
+function t(key) {
+  return translations[key] || key;
+}
+
+function applyTranslations() {
+  document.getElementById("title").textContent = t("filters");
+  document.getElementById("yearLabel").textContent = t("year");
+  document.getElementById("typeLabel").textContent = t("recordType");
+  document.getElementById("regionsLabel").textContent = t("regions");
+
+  // record types
+  const recordType = document.getElementById("recordType");
+  recordType.innerHTML = "";
+  ["Births","Marriages","Deaths"].forEach(type => {
+    const opt = document.createElement("option");
+    opt.value = type;
+    opt.textContent = t(type);
+    recordType.appendChild(opt);
+  });
+  recordType.value = state.type;
+
+  // legend
+  document.getElementById("legend").innerHTML = `
+    <span><span class="dot green"></span>${t("available")}</span>
+    <span><span class="dot red"></span>${t("missing")}</span>
+    <span><span class="dot gray"></span>${t("none")}</span>
+  `;
+
+  // regions
+  const regionList = document.getElementById("regionList");
+  regionList.innerHTML = "";
+
+  const regions = [
+    { id: "poland/dolnoslaskie", name: t("dolnoslaskie") },
+    { id: "poland/mazowieckie", name: t("mazowieckie") },
+    { id: "belarus", name: t("belarus") }
+  ];
+
+  regions.forEach(r => {
+    const label = document.createElement("label");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.value = r.id;
+    cb.checked = state.regions.includes(r.id);
+
+    cb.addEventListener("change", () => {
+      if (cb.checked) {
+        loadRegion(r.id);
+        state.regions.push(r.id);
+      } else {
+        unloadRegion(r.id);
+        state.regions = state.regions.filter(x => x !== r.id);
+      }
+      updateURL();
+    });
+
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(" " + r.name));
+    regionList.appendChild(label);
+  });
+}
+
+// --- DATA LOGIC ---
 function hasType(records, type) {
   return records.some(r => r.type === type);
 }
@@ -52,159 +134,81 @@ function getColor(records, type, year) {
   return "red";
 }
 
-// --- ICON ---
-
 function createIcon(color) {
   return L.divIcon({
     className: "custom-marker",
-    html: `<div style="
-      background:${color};
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      border:2px solid white;
-      box-shadow:0 0 4px rgba(0,0,0,0.5);
-    "></div>`
+    html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`
   });
 }
 
-// --- POPUP ---
-
-function formatPopup(properties) {
-  let html = `<div class="popup-content">`;
-  html += `<b>${properties.name}</b><br><hr>`;
-
-  properties.records.forEach(r => {
-    html += `<div class="record"><b>${r.type}</b><br>`;
-    r.periods.forEach(p => {
-      html += `${p.from}–${p.to} <a href="${p.url}" target="_blank">🔗</a><br>`;
-    });
-    html += `</div>`;
-  });
-
-  html += `</div>`;
-  return html;
-}
-
-// --- UPDATE MAP ---
-
-function updateMap(year, type) {
+function updateMap() {
   Object.values(layers).forEach(layerGroup => {
     layerGroup.eachLayer(layer => {
-      const props = layer.feature.properties;
-      const color = getColor(props.records, type, year);
+      const color = getColor(layer.feature.properties.records, state.type, state.year);
       layer.setIcon(createIcon(color));
     });
   });
 }
 
-// --- REGION LOADING ---
+// --- REGIONS ---
+function loadRegion(path) {
+  if (layers[path]) return;
 
-function loadRegion(regionPath) {
-  if (layers[regionPath]) return;
-
-  fetch(`./data/${regionPath}/data.geojson`)
-    .then(res => res.json())
+  fetch(`./data/${path}/data.geojson`)
+    .then(r => r.json())
     .then(data => {
-
       const layer = L.geoJSON(data, {
-        pointToLayer: (feature, latlng) =>
-          L.marker(latlng, { icon: createIcon("gray") }),
-        onEachFeature: (feature, layer) =>
-          layer.bindPopup(formatPopup(feature.properties))
+        pointToLayer: (f, latlng) => L.marker(latlng, { icon: createIcon("gray") }),
+        onEachFeature: (f, l) => l.bindPopup(f.properties.name)
       }).addTo(map);
 
-      layers[regionPath] = layer;
-
-      updateMap(currentYear, currentType);
+      layers[path] = layer;
+      updateMap();
     });
 }
 
-function unloadRegion(regionPath) {
-  if (!layers[regionPath]) return;
-
-  map.removeLayer(layers[regionPath]);
-  delete layers[regionPath];
+function unloadRegion(path) {
+  if (!layers[path]) return;
+  map.removeLayer(layers[path]);
+  delete layers[path];
 }
 
-// --- CONTROLS INIT FROM URL ---
-
-const params = getParams();
-
-let currentYear = params.year;
-let currentType = params.type;
-
-// DOM refs
+// --- CONTROLS ---
 const slider = document.getElementById("yearSlider");
 const yearValue = document.getElementById("yearValue");
 const recordType = document.getElementById("recordType");
-const regionCheckboxes = document.querySelectorAll("#regionList input");
 
-// Apply initial state
-slider.value = currentYear;
-yearValue.textContent = currentYear;
-recordType.value = currentType;
-
-// Apply region selection
-regionCheckboxes.forEach(cb => {
-  if (params.regions.includes(cb.value)) {
-    cb.checked = true;
-  }
-});
-
-// --- LOAD INITIAL REGIONS ---
-
-document.querySelectorAll("#regionList input:checked")
-  .forEach(cb => loadRegion(cb.value));
-
-// --- CONTROLS EVENTS ---
+slider.value = state.year;
+yearValue.textContent = state.year;
 
 slider.addEventListener("input", () => {
-  currentYear = parseInt(slider.value);
-  yearValue.textContent = currentYear;
-
-  updateMap(currentYear, currentType);
-  syncURL();
+  state.year = parseInt(slider.value);
+  yearValue.textContent = state.year;
+  updateMap();
+  updateURL();
 });
 
 recordType.addEventListener("change", () => {
-  currentType = recordType.value;
-
-  updateMap(currentYear, currentType);
-  syncURL();
+  state.type = recordType.value;
+  updateMap();
+  updateURL();
 });
 
-// region changes
-regionCheckboxes.forEach(cb => {
-  cb.addEventListener("change", () => {
-    if (cb.checked) {
-      loadRegion(cb.value);
-    } else {
-      unloadRegion(cb.value);
-    }
-    syncURL();
-  });
+// --- MAP SYNC ---
+map.on("moveend", updateURL);
+
+// --- LANGUAGE TOGGLE ---
+document.getElementById("langToggle").addEventListener("click", async () => {
+  state.lang = state.lang === "en" ? "pl" : "en";
+  await loadTranslations(state.lang);
+  applyTranslations();
+  updateURL();
 });
 
-// --- URL SYNC ---
+// --- INIT ---
+(async function init() {
+  await loadTranslations(state.lang);
+  applyTranslations();
 
-function getSelectedRegions() {
-  return Array.from(regionCheckboxes)
-    .filter(cb => cb.checked)
-    .map(cb => cb.value);
-}
-
-function syncURL() {
-  updateURL(currentYear, currentType, getSelectedRegions());
-}
-
-// --- COLLAPSIBLE PANEL ---
-
-const controls = document.getElementById("controls");
-const toggleBtn = document.getElementById("toggleControls");
-
-toggleBtn.addEventListener("click", () => {
-  controls.classList.toggle("collapsed");
-  toggleBtn.textContent =
-    controls.classList.contains("collapsed") ? "▲" : "▼";
-});
+  state.regions.forEach(loadRegion);
+})();
