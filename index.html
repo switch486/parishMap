@@ -5,55 +5,40 @@
   <title>Parish Records Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Favicon -->
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
 <div id="controls" class="collapsed">
   <div id="controls-header">
-    📊 Filters
-    <button id="toggleControls">▼</button>
+    <span id="title">Filters</span>
+    <div>
+      <button id="langToggle">🌐</button>
+      <button id="toggleControls">▼</button>
+    </div>
   </div>
 
   <div id="controls-body">
 
     <div class="control-row">
-      <label>
-        Year: <strong><span id="yearValue">1850</span></strong>
-      </label>
-      <input type="range" id="yearSlider" min="1700" max="1950" value="1850" />
+      <label id="yearLabel"></label>
+      <span><strong id="yearValue"></strong></span>
+      <input type="range" id="yearSlider" min="1700" max="1950" />
     </div>
 
     <div class="control-row">
-      <label for="recordType">Record type:</label>
-      <select id="recordType">
-        <option value="Births">Births</option>
-        <option value="Marriages">Marriages</option>
-        <option value="Deaths">Deaths</option>
-      </select>
+      <label id="typeLabel"></label>
+      <select id="recordType"></select>
     </div>
 
     <div class="control-row">
-      <label>Regions:</label>
-      <div id="regionList">
-        <label><input type="checkbox" value="poland/dolnoslaskie"> Dolnośląskie</label>
-        <label><input type="checkbox" value="poland/mazowieckie"> Mazowieckie</label>
-        <label><input type="checkbox" value="belarus"> Belarus</label>
-      </div>
+      <label id="regionsLabel"></label>
+      <div id="regionList"></div>
     </div>
 
-    <div id="legend">
-      <span><span class="dot green"></span> available</span>
-      <span><span class="dot red"></span> missing year</span>
-      <span><span class="dot gray"></span> no records</span>
-    </div>
+    <div id="legend"></div>
 
   </div>
 </div>
