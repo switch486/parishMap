@@ -8,6 +8,31 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // --- STATE ---
 let layers = {};
 
+// --- URL PARAMS ---
+
+function getParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  return {
+    year: parseInt(params.get("year")) || 1850,
+    type: params.get("type") || "Births",
+    regions: params.get("regions") ? params.get("regions").split(",") : []
+  };
+}
+
+function updateURL(year, type, regions) {
+  const params = new URLSearchParams();
+
+  params.set("year", year);
+  params.set("type", type);
+
+  if (regions.length > 0) {
+    params.set("regions", regions.join(","));
+  }
+
+  history.replaceState(null, "", "?" + params.toString());
+}
+
 // --- DATA LOGIC ---
 
 function hasType(records, type) {
@@ -27,21 +52,19 @@ function getColor(records, type, year) {
   return "red";
 }
 
-// --- ICON FACTORY ---
+// --- ICON ---
 
 function createIcon(color) {
   return L.divIcon({
     className: "custom-marker",
-    html: `
-      <div style="
-        background:${color};
-        width:14px;
-        height:14px;
-        border-radius:50%;
-        border:2px solid white;
-        box-shadow:0 0 4px rgba(0,0,0,0.5);
-      "></div>
-    `
+    html: `<div style="
+      background:${color};
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      border:2px solid white;
+      box-shadow:0 0 4px rgba(0,0,0,0.5);
+    "></div>`
   });
 }
 
@@ -49,17 +72,13 @@ function createIcon(color) {
 
 function formatPopup(properties) {
   let html = `<div class="popup-content">`;
-  html += `<b>${properties.name}</b><br>`;
-  html += `<hr>`;
+  html += `<b>${properties.name}</b><br><hr>`;
 
   properties.records.forEach(r => {
     html += `<div class="record"><b>${r.type}</b><br>`;
-
     r.periods.forEach(p => {
-      html += `${p.from}–${p.to} 
-        <a href="${p.url}" target="_blank">🔗</a><br>`;
+      html += `${p.from}–${p.to} <a href="${p.url}" target="_blank">🔗</a><br>`;
     });
-
     html += `</div>`;
   });
 
@@ -67,7 +86,7 @@ function formatPopup(properties) {
   return html;
 }
 
-// --- MAP UPDATE ---
+// --- UPDATE MAP ---
 
 function updateMap(year, type) {
   Object.values(layers).forEach(layerGroup => {
@@ -82,7 +101,6 @@ function updateMap(year, type) {
 // --- REGION LOADING ---
 
 function loadRegion(regionPath) {
-  // prevent duplicate loads
   if (layers[regionPath]) return;
 
   fetch(`./data/${regionPath}/data.geojson`)
@@ -90,25 +108,16 @@ function loadRegion(regionPath) {
     .then(data => {
 
       const layer = L.geoJSON(data, {
-        pointToLayer: function (feature, latlng) {
-          return L.marker(latlng, {
-            icon: createIcon("gray")
-          });
-        },
-        onEachFeature: function (feature, layer) {
-          layer.bindPopup(formatPopup(feature.properties));
-        }
+        pointToLayer: (feature, latlng) =>
+          L.marker(latlng, { icon: createIcon("gray") }),
+        onEachFeature: (feature, layer) =>
+          layer.bindPopup(formatPopup(feature.properties))
       }).addTo(map);
 
       layers[regionPath] = layer;
 
-      // apply current filters immediately
-      updateMap(
-        parseInt(slider.value),
-        recordType.value
-      );
-    })
-    .catch(err => console.error("Error loading region:", err));
+      updateMap(currentYear, currentType);
+    });
 }
 
 function unloadRegion(regionPath) {
@@ -118,43 +127,76 @@ function unloadRegion(regionPath) {
   delete layers[regionPath];
 }
 
-// --- CONTROLS ---
+// --- CONTROLS INIT FROM URL ---
 
+const params = getParams();
+
+let currentYear = params.year;
+let currentType = params.type;
+
+// DOM refs
 const slider = document.getElementById("yearSlider");
 const yearValue = document.getElementById("yearValue");
 const recordType = document.getElementById("recordType");
-
-// year slider
-slider.addEventListener("input", () => {
-  const year = parseInt(slider.value);
-  yearValue.textContent = year;
-  updateMap(year, recordType.value);
-});
-
-// record type dropdown
-recordType.addEventListener("change", () => {
-  updateMap(parseInt(slider.value), recordType.value);
-});
-
-// --- REGION CHECKBOXES ---
-
 const regionCheckboxes = document.querySelectorAll("#regionList input");
 
+// Apply initial state
+slider.value = currentYear;
+yearValue.textContent = currentYear;
+recordType.value = currentType;
+
+// Apply region selection
+regionCheckboxes.forEach(cb => {
+  if (params.regions.includes(cb.value)) {
+    cb.checked = true;
+  }
+});
+
+// --- LOAD INITIAL REGIONS ---
+
+document.querySelectorAll("#regionList input:checked")
+  .forEach(cb => loadRegion(cb.value));
+
+// --- CONTROLS EVENTS ---
+
+slider.addEventListener("input", () => {
+  currentYear = parseInt(slider.value);
+  yearValue.textContent = currentYear;
+
+  updateMap(currentYear, currentType);
+  syncURL();
+});
+
+recordType.addEventListener("change", () => {
+  currentType = recordType.value;
+
+  updateMap(currentYear, currentType);
+  syncURL();
+});
+
+// region changes
 regionCheckboxes.forEach(cb => {
   cb.addEventListener("change", () => {
-    const region = cb.value;
-
     if (cb.checked) {
-      loadRegion(region);
+      loadRegion(cb.value);
     } else {
-      unloadRegion(region);
+      unloadRegion(cb.value);
     }
+    syncURL();
   });
 });
 
-// initial load (checked regions)
-document.querySelectorAll("#regionList input:checked")
-  .forEach(cb => loadRegion(cb.value));
+// --- URL SYNC ---
+
+function getSelectedRegions() {
+  return Array.from(regionCheckboxes)
+    .filter(cb => cb.checked)
+    .map(cb => cb.value);
+}
+
+function syncURL() {
+  updateURL(currentYear, currentType, getSelectedRegions());
+}
 
 // --- COLLAPSIBLE PANEL ---
 
