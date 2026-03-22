@@ -205,6 +205,30 @@ document.getElementById("langToggle").addEventListener("click", async () => {
   updateURL();
 });
 
+// --- controls toggle ---
+
+const controls = document.getElementById("controls");
+const header = document.getElementById("controls-header");
+const toggleBtn = document.getElementById("toggleControls");
+
+function toggleControls() {
+  controls.classList.toggle("collapsed");
+
+  toggleBtn.textContent =
+    controls.classList.contains("collapsed") ? "▲" : "▼";
+}
+
+// Click on button
+toggleBtn.addEventListener("click", (e) => {
+  e.stopPropagation(); // prevent double trigger
+  toggleControls();
+});
+
+// Click on header (better UX)
+header.addEventListener("click", () => {
+  toggleControls();
+});
+
 // --- INIT ---
 (async function init() {
   await loadTranslations(state.lang);
