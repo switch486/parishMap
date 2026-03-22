@@ -1,0 +1,15 @@
+{
+  "filters": "Filters",
+  "year": "Year",
+  "recordType": "Record type",
+  "regions": "Regions",
+  "Births": "Births",
+  "Marriages": "Marriages",
+  "Deaths": "Deaths",
+  "available": "available",
+  "missing": "missing year",
+  "none": "no records",
+  "dolnoslaskie": "Dolnośląskie",
+  "mazowieckie": "Mazowieckie",
+  "belarus": "Belarus"
+}
