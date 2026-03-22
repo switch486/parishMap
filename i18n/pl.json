@@ -1,0 +1,15 @@
+{
+  "filters": "Filtry",
+  "year": "Rok",
+  "recordType": "Typ metryk",
+  "regions": "Regiony",
+  "Births": "Urodzenia",
+  "Marriages": "Małżeństwa",
+  "Deaths": "Zgony",
+  "available": "dostępne",
+  "missing": "brak w tym roku",
+  "none": "brak metryk",
+  "dolnoslaskie": "Dolnośląskie",
+  "mazowieckie": "Mazowieckie",
+  "belarus": "Białoruś"
+}
