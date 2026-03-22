@@ -27,14 +27,14 @@
       <input type="range" id="yearSlider" min="1700" max="1950" value="1850" />
     </div>
 
-    <div class="control-row">
-      <label for="regionSelect">Region:</label>
-      <select id="regionSelect">
-          <option value="poland/dolnoslaskie">Poland – Dolnośląskie</option>
-          <option value="poland/mazowieckie">Poland – Mazowieckie</option>
-          <option value="belarus">Belarus</option>
-      </select>
-    </div>
+<div class="control-row">
+  <label>Regions:</label>
+  <div id="regionList">
+    <label><input type="checkbox" value="poland/dolnoslaskie" checked> Dolnośląskie</label>
+    <label><input type="checkbox" value="poland/mazowieckie"> Mazowieckie</label>
+    <label><input type="checkbox" value="belarus"> Belarus</label>
+  </div>
+</div>
 
     <div class="control-row">
       <label for="recordType">Record type:</label>
