@@ -68,29 +68,29 @@ function formatPopup(properties) {
 // --- UPDATE MAP ---
 
 function updateMap(year, type) {
-  geoLayer.eachLayer(layer => {
+  Object.values(layers).forEach(layerGroup => {
+  layerGroup.eachLayer(layer => {
     const props = layer.feature.properties;
     const color = getColor(props.records, type, year);
 
     layer.setIcon(createIcon(color));
   });
+});
 }
 
 // --- LOAD DATA ---
 
-let currentLayer;
+let layers = {};
 
 function loadRegion(regionPath) {
-  // Remove old layer
-  if (currentLayer) {
-    map.removeLayer(currentLayer);
-  }
+  // Skip if already loaded
+  if (layers[regionPath]) return;
 
   fetch(`./data/${regionPath}/data.geojson`)
     .then(res => res.json())
     .then(data => {
 
-      currentLayer = L.geoJSON(data, {
+      const layer = L.geoJSON(data, {
         pointToLayer: function (feature, latlng) {
           return L.marker(latlng, {
             icon: createIcon("gray")
@@ -101,7 +101,7 @@ function loadRegion(regionPath) {
         }
       }).addTo(map);
 
-      geoLayer = currentLayer;
+      layers[regionPath] = layer;
 
       updateMap(
         parseInt(slider.value),
@@ -110,6 +110,27 @@ function loadRegion(regionPath) {
     })
     .catch(err => console.error("Error loading region:", err));
 }
+
+function unloadRegion(regionPath) {
+  if (!layers[regionPath]) return;
+
+  map.removeLayer(layers[regionPath]);
+  delete layers[regionPath];
+}
+
+const regionCheckboxes = document.querySelectorAll("#regionList input");
+
+regionCheckboxes.forEach(cb => {
+  cb.addEventListener("change", () => {
+    const region = cb.value;
+
+    if (cb.checked) {
+      loadRegion(region);
+    } else {
+      unloadRegion(region);
+    }
+  });
+});
 
 // --- CONTROLS ---
 
@@ -135,7 +156,8 @@ regionSelect.addEventListener("change", () => {
   loadRegion(regionSelect.value);
 });
 
-loadRegion(regionSelect.value);
+document.querySelectorAll("#regionList input:checked")
+  .forEach(cb => loadRegion(cb.value));
 
 // --- COLLAPSIBLE PANEL ---
 
