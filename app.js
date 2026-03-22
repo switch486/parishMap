@@ -1,13 +1,14 @@
-// Map init
+// --- MAP INIT ---
 const map = L.map('map').setView([51.1079, 17.0385], 8);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-let geoLayer;
+// --- STATE ---
+let layers = {};
 
-// --- DATA LOGIC (UPDATED FOR MULTIPLE TIMESPANS) ---
+// --- DATA LOGIC ---
 
 function hasType(records, type) {
   return records.some(r => r.type === type);
@@ -20,8 +21,6 @@ function hasTypeInYear(records, type, year) {
   );
 }
 
-// --- COLOR LOGIC ---
-
 function getColor(records, type, year) {
   if (!hasType(records, type)) return "gray";
   if (hasTypeInYear(records, type, year)) return "green";
@@ -33,14 +32,16 @@ function getColor(records, type, year) {
 function createIcon(color) {
   return L.divIcon({
     className: "custom-marker",
-    html: `<div style="
-      background:${color};
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      border:2px solid white;
-      box-shadow:0 0 4px rgba(0,0,0,0.5);
-    "></div>`
+    html: `
+      <div style="
+        background:${color};
+        width:14px;
+        height:14px;
+        border-radius:50%;
+        border:2px solid white;
+        box-shadow:0 0 4px rgba(0,0,0,0.5);
+      "></div>
+    `
   });
 }
 
@@ -55,7 +56,8 @@ function formatPopup(properties) {
     html += `<div class="record"><b>${r.type}</b><br>`;
 
     r.periods.forEach(p => {
-      html += `${p.from}–${p.to} <a href="${p.url}" target="_blank">🔗</a><br>`;
+      html += `${p.from}–${p.to} 
+        <a href="${p.url}" target="_blank">🔗</a><br>`;
     });
 
     html += `</div>`;
@@ -65,25 +67,22 @@ function formatPopup(properties) {
   return html;
 }
 
-// --- UPDATE MAP ---
+// --- MAP UPDATE ---
 
 function updateMap(year, type) {
   Object.values(layers).forEach(layerGroup => {
-  layerGroup.eachLayer(layer => {
-    const props = layer.feature.properties;
-    const color = getColor(props.records, type, year);
-
-    layer.setIcon(createIcon(color));
+    layerGroup.eachLayer(layer => {
+      const props = layer.feature.properties;
+      const color = getColor(props.records, type, year);
+      layer.setIcon(createIcon(color));
+    });
   });
-});
 }
 
-// --- LOAD DATA ---
-
-let layers = {};
+// --- REGION LOADING ---
 
 function loadRegion(regionPath) {
-  // Skip if already loaded
+  // prevent duplicate loads
   if (layers[regionPath]) return;
 
   fetch(`./data/${regionPath}/data.geojson`)
@@ -103,6 +102,7 @@ function loadRegion(regionPath) {
 
       layers[regionPath] = layer;
 
+      // apply current filters immediately
       updateMap(
         parseInt(slider.value),
         recordType.value
@@ -118,6 +118,26 @@ function unloadRegion(regionPath) {
   delete layers[regionPath];
 }
 
+// --- CONTROLS ---
+
+const slider = document.getElementById("yearSlider");
+const yearValue = document.getElementById("yearValue");
+const recordType = document.getElementById("recordType");
+
+// year slider
+slider.addEventListener("input", () => {
+  const year = parseInt(slider.value);
+  yearValue.textContent = year;
+  updateMap(year, recordType.value);
+});
+
+// record type dropdown
+recordType.addEventListener("change", () => {
+  updateMap(parseInt(slider.value), recordType.value);
+});
+
+// --- REGION CHECKBOXES ---
+
 const regionCheckboxes = document.querySelectorAll("#regionList input");
 
 regionCheckboxes.forEach(cb => {
@@ -132,30 +152,7 @@ regionCheckboxes.forEach(cb => {
   });
 });
 
-// --- CONTROLS ---
-
-const slider = document.getElementById("yearSlider");
-const yearValue = document.getElementById("yearValue");
-const recordType = document.getElementById("recordType");
-
-slider.addEventListener("input", () => {
-  const year = parseInt(slider.value);
-  yearValue.textContent = year;
-  updateMap(year, recordType.value);
-});
-
-recordType.addEventListener("change", () => {
-  updateMap(parseInt(slider.value), recordType.value);
-});
-
-// --- select Region ---
-
-const regionSelect = document.getElementById("regionSelect");
-
-regionSelect.addEventListener("change", () => {
-  loadRegion(regionSelect.value);
-});
-
+// initial load (checked regions)
 document.querySelectorAll("#regionList input:checked")
   .forEach(cb => loadRegion(cb.value));
 
@@ -166,5 +163,6 @@ const toggleBtn = document.getElementById("toggleControls");
 
 toggleBtn.addEventListener("click", () => {
   controls.classList.toggle("collapsed");
-  toggleBtn.textContent = controls.classList.contains("collapsed") ? "▲" : "▼";
+  toggleBtn.textContent =
+    controls.classList.contains("collapsed") ? "▲" : "▼";
 });
