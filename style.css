@@ -11,15 +11,13 @@ body {
 /* Controls panel */
 #controls {
   position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  z-index: 1000;
-  min-width: 420px;
-  overflow: hidden;
+  top: 20px;
+  right: 20px;
+  transform: none;
+  width: 260px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Header */
