@@ -1,0 +1,75 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Świranki",
+        "deanery": "Worniany",
+        "diocese": "Archidiecezja Wileńska",
+        "records": [
+          {
+            "type": "Births",
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
+          },
+          {
+            "type": "Marriages",
+            "periods": [
+              { "from": 1760, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1840, "url": "https://example.com/b" }
+            ]
+          },
+          {
+            "type": "Deaths",
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [26.062667, 54.839997]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kluszczany",
+        "deanery": "Świr",
+        "diocese": "Archidiecezja Wileńska",
+        "records": [
+          {
+            "type": "Births",
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
+          },
+          {
+            "type": "Marriages",
+            "periods": [
+              { "from": 1760, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1840, "url": "https://example.com/b" }
+            ]
+          },
+          {
+            "type": "Deaths",
+            "periods": [
+              { "from": 1780, "to": 1820, "url": "https://example.com/a" },
+              { "from": 1830, "to": 1870, "url": "https://example.com/b" }
+            ]
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [26.15834556355457, 54.964654435276735]
+      }
+    }
+  ]
+}
