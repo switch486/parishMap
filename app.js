@@ -89,7 +89,8 @@ function applyTranslations() {
   const regions = [
     { id: "poland/dolnoslaskie", name: t("dolnoslaskie") },
     { id: "poland/mazowieckie", name: t("mazowieckie") },
-    { id: "belarus", name: t("belarus") }
+    { id: "belarus", name: t("belarus") },
+    { id: "adama", name: t("adama") }
   ];
 
   regions.forEach(r => {
