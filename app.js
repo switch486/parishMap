@@ -151,6 +151,24 @@ function updateMap() {
   });
 }
 
+// --- POPUP ---
+
+function formatPopup(properties) {
+  let html = `<div class="popup-content">`;
+  html += `<b>${properties.name}</b><br><hr>`;
+
+  properties.records.forEach(r => {
+    html += `<div class="record"><b>${r.type}</b><br>`;
+    r.periods.forEach(p => {
+      html += `${p.from}–${p.to} <a href="${p.url}" target="_blank">🔗</a><br>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
 // --- REGIONS ---
 function loadRegion(path) {
   if (layers[path]) return;
@@ -160,7 +178,7 @@ function loadRegion(path) {
     .then(data => {
       const layer = L.geoJSON(data, {
         pointToLayer: (f, latlng) => L.marker(latlng, { icon: createIcon("gray") }),
-        onEachFeature: (f, l) => l.bindPopup(f.properties.name)
+        onEachFeature: (f, l) => l.bindPopup(formatPopup(f.properties))
       }).addTo(map);
 
       layers[path] = layer;
