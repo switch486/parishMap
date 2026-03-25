@@ -102,6 +102,45 @@
         "type": "Point",
         "coordinates": [21.15640510098483, 50.37709138463714]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zborówek",
+        "deanery": "??",
+        "diocese": "Sandomierska",
+        "records": [
+          {
+            "type": "Births",
+            "periods": [
+              { "from": 1736, "to": 1778, "url": "https://metryki.genbaza.pl/genbaza,list,59008,1" },
+              { "from": 1797, "to": 1810, "url": "https://metryki.genbaza.pl/genbaza,list,59008,1" },
+              { "from": 1811, "to": 1818, "url": "https://metryki.genbaza.pl/genbaza,list,59008,1" },
+              { "from": 1826, "to": 1869, "url": "https://metryki.genbaza.pl/genbaza,list,59008,1" },
+              { "from": 1875, "to": 1924, "url": "https://metryki.genbaza.pl/genbaza,list,429233,1" }
+            ]
+          },
+          {
+            "type": "Marriages",
+            "periods": [
+              { "from": 1826, "to": 1834, "url": "https://metryki.genbaza.pl/genbaza,list,59008,1" },
+              { "from": 1875, "to": 1924, "url": "https://metryki.genbaza.pl/genbaza,list,429233,1" }
+            ]
+          },
+          {
+            "type": "Deaths",
+            "periods": [
+              { "from": 1769, "to": 1791, "url": "https://metryki.genbaza.pl/genbaza,list,59008,1" },
+              { "from": 1826, "to": 1887, "url": "https://metryki.genbaza.pl/genbaza,list,59008,1" },
+              { "from": 1875, "to": 1924, "url": "https://metryki.genbaza.pl/genbaza,list,429233,1" }
+            ]
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [21.09701841371929, 50.393903144040685]
+      }
     }
   ]
 }
