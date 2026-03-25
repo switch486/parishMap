@@ -70,6 +70,38 @@
         "type": "Point",
         "coordinates": [26.15834556355457, 54.964654435276735]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Szczebrzusz",
+        "deanery": "??",
+        "diocese": "Sandomierska",
+        "records": [
+          {
+            "type": "Births",
+            "periods": [
+              { "from": 1875, "to": 1920, "url": "https://metryki.genbaza.pl/genbaza,list,387102,1" }
+            ]
+          },
+          {
+            "type": "Marriages",
+            "periods": [
+              { "from": 1875, "to": 1920, "url": "https://metryki.genbaza.pl/genbaza,list,387102,1" }
+            ]
+          },
+          {
+            "type": "Deaths",
+            "periods": [
+              { "from": 1875, "to": 1920, "url": "https://metryki.genbaza.pl/genbaza,list,387102,1" }
+            ]
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [21.15640510098483, 50.37709138463714]
+      }
     }
   ]
 }
